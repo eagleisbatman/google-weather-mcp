@@ -98,6 +98,10 @@ app.get('/', (req, res) => {
 
 // Main MCP endpoint
 app.post('/mcp', async (req, res) => {
+  const accept = req.headers.accept || '';
+  if (!accept.includes('application/json') || !accept.includes('text/event-stream')) {
+    req.headers.accept = 'application/json, text/event-stream';
+  }
   try {
     // Extract default coordinates from headers with validation
     const headerLat = req.headers['x-farm-latitude'] as string;

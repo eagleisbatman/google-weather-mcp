@@ -4,3 +4,6 @@ dist/
 *.log
 .DS_Store
 docs/
+
+# Claude Code instructions (local only)
+CLAUDE.md

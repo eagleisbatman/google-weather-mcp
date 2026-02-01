@@ -116,14 +116,20 @@ app.post('/mcp', async (req, res) => {
 
     // ===========================================
     // TOOL NAMING STANDARD: domain.provider.action
-    // Old names kept as aliases for backward compatibility
     // ===========================================
 
     // ===========================================
     // TOOL 1: Current Conditions
     // ===========================================
 
-    const currentHandler = async ({ latitude, longitude }: { latitude?: number; longitude?: number }) => {
+    const CurrentInputSchema = z.object({
+      latitude: z.number().min(-90).max(90).optional().describe('Latitude coordinate. Optional if provided in headers.'),
+      longitude: z.number().min(-180).max(180).optional().describe('Longitude coordinate. Optional if provided in headers.')
+    }).strict();
+
+    type CurrentInput = z.infer<typeof CurrentInputSchema>;
+
+    const currentHandler = async ({ latitude, longitude }: CurrentInput) => {
       try {
         const lat = latitude ?? defaultLatitude;
         const lon = longitude ?? defaultLongitude;
@@ -202,24 +208,42 @@ app.post('/mcp', async (req, res) => {
       }
     };
 
-    const currentSchema = {
-      latitude: z.number().min(-90).max(90).optional().describe('Latitude coordinate. Optional if provided in headers.'),
-      longitude: z.number().min(-180).max(180).optional().describe('Longitude coordinate. Optional if provided in headers.')
-    };
-
     const currentDescription = `Get real-time current weather conditions from Google Weather.
 TRIGGERS: "what is the weather", "is it raining", "temperature today", "current weather", "weather now"
 RETURNS: temperature, humidity, wind, precipitation, UV index, spray conditions assessment.
 COVERAGE: Global - Data from Google Weather API.`;
 
-    server.tool('weather.google.current', currentDescription, currentSchema, currentHandler);
-    server.tool('get_google_current_conditions', currentDescription, currentSchema, currentHandler);
+    const currentAnnotations = {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
+    };
+
+    server.registerTool(
+      'weather.google.current',
+      {
+        title: 'Google Current Weather',
+        description: currentDescription,
+        inputSchema: CurrentInputSchema,
+        annotations: currentAnnotations
+      },
+      currentHandler
+    );
 
     // ===========================================
     // TOOL 2: Daily Forecast
     // ===========================================
 
-    const dailyForecastHandler = async ({ latitude, longitude, days = 7 }: { latitude?: number; longitude?: number; days?: number }) => {
+    const DailyForecastInputSchema = z.object({
+      latitude: z.number().min(-90).max(90).optional().describe('Latitude coordinate. Optional if provided in headers.'),
+      longitude: z.number().min(-180).max(180).optional().describe('Longitude coordinate. Optional if provided in headers.'),
+      days: z.number().min(1).max(10).default(7).optional().describe('Number of forecast days (1-10, default: 7).')
+    }).strict();
+
+    type DailyForecastInput = z.infer<typeof DailyForecastInputSchema>;
+
+    const dailyForecastHandler = async ({ latitude, longitude, days = 7 }: DailyForecastInput) => {
       try {
         const lat = latitude ?? defaultLatitude;
         const lon = longitude ?? defaultLongitude;
@@ -305,25 +329,42 @@ COVERAGE: Global - Data from Google Weather API.`;
       }
     };
 
-    const dailyForecastSchema = {
-      latitude: z.number().min(-90).max(90).optional().describe('Latitude coordinate. Optional if provided in headers.'),
-      longitude: z.number().min(-180).max(180).optional().describe('Longitude coordinate. Optional if provided in headers.'),
-      days: z.number().min(1).max(10).default(7).optional().describe('Number of forecast days (1-10, default: 7).')
-    };
-
     const dailyForecastDescription = `Get daily weather forecast (1-10 days) from Google Weather.
 TRIGGERS: "weekly forecast", "weather this week", "next week weather", "when to plant", "planting weather", "harvest weather"
 RETURNS: daily min/max temperature, precipitation probability, wind, UV index, sunrise/sunset.
 COVERAGE: Global - Data from Google Weather API.`;
 
-    server.tool('weather.google.forecast_daily', dailyForecastDescription, dailyForecastSchema, dailyForecastHandler);
-    server.tool('get_google_daily_forecast', dailyForecastDescription, dailyForecastSchema, dailyForecastHandler);
+    const dailyForecastAnnotations = {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
+    };
+
+    server.registerTool(
+      'weather.google.forecast_daily',
+      {
+        title: 'Google Daily Forecast',
+        description: dailyForecastDescription,
+        inputSchema: DailyForecastInputSchema,
+        annotations: dailyForecastAnnotations
+      },
+      dailyForecastHandler
+    );
 
     // ===========================================
     // TOOL 3: Hourly Forecast
     // ===========================================
 
-    const hourlyForecastHandler = async ({ latitude, longitude, hours = 24 }: { latitude?: number; longitude?: number; hours?: number }) => {
+    const HourlyForecastInputSchema = z.object({
+      latitude: z.number().min(-90).max(90).optional().describe('Latitude coordinate. Optional if provided in headers.'),
+      longitude: z.number().min(-180).max(180).optional().describe('Longitude coordinate. Optional if provided in headers.'),
+      hours: z.number().min(1).max(240).default(24).optional().describe('Number of forecast hours (1-240, default: 24).')
+    }).strict();
+
+    type HourlyForecastInput = z.infer<typeof HourlyForecastInputSchema>;
+
+    const hourlyForecastHandler = async ({ latitude, longitude, hours = 24 }: HourlyForecastInput) => {
       try {
         const lat = latitude ?? defaultLatitude;
         const lon = longitude ?? defaultLongitude;
@@ -433,25 +474,42 @@ COVERAGE: Global - Data from Google Weather API.`;
       }
     };
 
-    const hourlyForecastSchema = {
-      latitude: z.number().min(-90).max(90).optional().describe('Latitude coordinate. Optional if provided in headers.'),
-      longitude: z.number().min(-180).max(180).optional().describe('Longitude coordinate. Optional if provided in headers.'),
-      hours: z.number().min(1).max(240).default(24).optional().describe('Number of forecast hours (1-240, default: 24).')
-    };
-
     const hourlyForecastDescription = `Get hourly weather forecast (1-240 hours) from Google Weather.
 TRIGGERS: "when should I spray", "spray timing", "hourly forecast", "weather tomorrow", "rain tomorrow", "will it rain"
 RETURNS: hourly temperature, wind, precipitation, spray condition windows.
 COVERAGE: Global - Data from Google Weather API.`;
 
-    server.tool('weather.google.forecast_hourly', hourlyForecastDescription, hourlyForecastSchema, hourlyForecastHandler);
-    server.tool('get_google_hourly_forecast', hourlyForecastDescription, hourlyForecastSchema, hourlyForecastHandler);
+    const hourlyForecastAnnotations = {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
+    };
+
+    server.registerTool(
+      'weather.google.forecast_hourly',
+      {
+        title: 'Google Hourly Forecast',
+        description: hourlyForecastDescription,
+        inputSchema: HourlyForecastInputSchema,
+        annotations: hourlyForecastAnnotations
+      },
+      hourlyForecastHandler
+    );
 
     // ===========================================
     // TOOL 4: Hourly History (unique to Google Weather)
     // ===========================================
 
-    const historyHandler = async ({ latitude, longitude, hours = 24 }: { latitude?: number; longitude?: number; hours?: number }) => {
+    const HistoryInputSchema = z.object({
+      latitude: z.number().min(-90).max(90).optional().describe('Latitude coordinate. Optional if provided in headers.'),
+      longitude: z.number().min(-180).max(180).optional().describe('Longitude coordinate. Optional if provided in headers.'),
+      hours: z.number().min(1).max(24).default(24).optional().describe('Number of past hours (1-24, default: 24).')
+    }).strict();
+
+    type HistoryInput = z.infer<typeof HistoryInputSchema>;
+
+    const historyHandler = async ({ latitude, longitude, hours = 24 }: HistoryInput) => {
       try {
         const lat = latitude ?? defaultLatitude;
         const lon = longitude ?? defaultLongitude;
@@ -528,19 +586,28 @@ COVERAGE: Global - Data from Google Weather API.`;
       }
     };
 
-    const historySchema = {
-      latitude: z.number().min(-90).max(90).optional().describe('Latitude coordinate. Optional if provided in headers.'),
-      longitude: z.number().min(-180).max(180).optional().describe('Longitude coordinate. Optional if provided in headers.'),
-      hours: z.number().min(1).max(24).default(24).optional().describe('Number of past hours (1-24, default: 24).')
-    };
-
     const historyDescription = `Get historical weather data (past 1-24 hours) from Google Weather.
 TRIGGERS: "past weather", "weather history", "what was the weather", "yesterday weather", "last night weather"
 RETURNS: hourly temperature, humidity, wind, precipitation totals.
 COVERAGE: Global - Data from Google Weather API.`;
 
-    server.tool('weather.google.history_hourly', historyDescription, historySchema, historyHandler);
-    server.tool('get_google_hourly_history', historyDescription, historySchema, historyHandler);
+    const historyAnnotations = {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
+    };
+
+    server.registerTool(
+      'weather.google.history_hourly',
+      {
+        title: 'Google Hourly History',
+        description: historyDescription,
+        inputSchema: HistoryInputSchema,
+        annotations: historyAnnotations
+      },
+      historyHandler
+    );
 
     // Connect and handle request
     await server.connect(transport);
@@ -572,11 +639,11 @@ const serverInstance = app.listen(Number(PORT), HOST, () => {
   console.log(`Health check: http://localhost:${PORT}/health`);
   console.log(`MCP endpoint: http://localhost:${PORT}/mcp`);
   console.log(`Google Weather API: ${GOOGLE_WEATHER_API_KEY ? 'Configured' : 'NOT CONFIGURED'}`);
-  console.log('Tools: 4 (with backward-compatible aliases)');
-  console.log('   - weather.google.current (alias: get_google_current_conditions)');
-  console.log('   - weather.google.forecast_daily (alias: get_google_daily_forecast)');
-  console.log('   - weather.google.forecast_hourly (alias: get_google_hourly_forecast)');
-  console.log('   - weather.google.history_hourly (alias: get_google_hourly_history)');
+  console.log('Tools: 4');
+  console.log('   - weather.google.current');
+  console.log('   - weather.google.forecast_daily');
+  console.log('   - weather.google.forecast_hourly');
+  console.log('   - weather.google.history_hourly');
   console.log('=========================================');
   console.log('');
 });

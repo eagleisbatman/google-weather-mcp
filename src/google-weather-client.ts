@@ -458,7 +458,8 @@ export class GoogleWeatherClient {
         if (errorBody.includes('RESOURCE_EXHAUSTED') || errorBody.includes('quota')) {
           throw new Error('Google Weather API quota exceeded. Check your API key quota in Google Cloud Console.');
         }
-        throw new Error(`Google Weather API access denied: ${errorBody}`);
+        console.error('[Google Weather] Access denied (403):', errorBody);
+        throw new Error('Google Weather API access denied (403)');
       }
 
       // Handle API key errors (400)
@@ -467,7 +468,8 @@ export class GoogleWeatherClient {
         if (errorBody.includes('API_KEY_INVALID') || errorBody.includes('invalid key')) {
           throw new Error('Invalid Google Weather API key. Please check your API key configuration.');
         }
-        throw new Error(`Google Weather API bad request: ${errorBody}`);
+        console.error('[Google Weather] Bad request (400):', errorBody);
+        throw new Error('Google Weather API bad request (400)');
       }
 
       // Retry on server errors (5xx)
@@ -537,7 +539,8 @@ export class GoogleWeatherClient {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Google Weather API error (${response.status}): ${errorText || response.statusText}`);
+      console.error(`[Google Weather] API error (${response.status}):`, errorText);
+      throw new Error(`Google Weather API error (${response.status})`);
     }
 
     const data = await response.json() as GoogleCurrentConditionsResponse;
@@ -569,7 +572,8 @@ export class GoogleWeatherClient {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Google Weather API error (${response.status}): ${errorText || response.statusText}`);
+      console.error(`[Google Weather] API error (${response.status}):`, errorText);
+      throw new Error(`Google Weather API error (${response.status})`);
     }
 
     const data = await response.json() as GoogleDailyForecastResponse;
@@ -601,7 +605,8 @@ export class GoogleWeatherClient {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Google Weather API error (${response.status}): ${errorText || response.statusText}`);
+      console.error(`[Google Weather] API error (${response.status}):`, errorText);
+      throw new Error(`Google Weather API error (${response.status})`);
     }
 
     const data = await response.json() as GoogleHourlyForecastResponse;
@@ -633,7 +638,8 @@ export class GoogleWeatherClient {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Google Weather API error (${response.status}): ${errorText || response.statusText}`);
+      console.error(`[Google Weather] API error (${response.status}):`, errorText);
+      throw new Error(`Google Weather API error (${response.status})`);
     }
 
     const data = await response.json() as GoogleHourlyHistoryResponse;

@@ -45,7 +45,7 @@ npm run build && npm start
 
 ## MCP Tools
 
-### 1. `get_google_current_conditions`
+### 1. `weather.google.current`
 
 Get real-time weather conditions for a location.
 
@@ -62,7 +62,7 @@ Get real-time weather conditions for a location.
 - Cloud cover, visibility, pressure
 - Spray condition assessment
 
-### 2. `get_google_daily_forecast`
+### 2. `weather.google.forecast`
 
 Get daily weather forecast for planning.
 
@@ -79,7 +79,7 @@ Get daily weather forecast for planning.
 - Sunrise/sunset times
 - Agricultural impact assessment
 
-### 3. `get_google_hourly_forecast`
+### 3. `weather.google.forecast` (hourly)
 
 Get hourly weather forecast for precise planning.
 
@@ -95,7 +95,7 @@ Get hourly weather forecast for precise planning.
 - Cloud cover
 - Spray window detection
 
-### 4. `get_google_hourly_history`
+### 4. `weather.google.current` (history)
 
 Get historical weather data for the past 24 hours.
 
